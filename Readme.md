@@ -5,7 +5,7 @@
 <!-- default badges end -->
 # ASP.NET Web Forms Controls - How to implement a Theme Selector control shown in DevExpress Demos
 <!-- run online -->
-**[[Run Online]](https://codecentral.devexpress.com/t590818/)**
+**[[Run Online]](https://codecentral.devexpress.com/t504407/)**
 <!-- run online end -->
 
 This example demonstrates how to implement a Theme Selector control as in [ASP.NET Web Forms Demos](https://demos.devexpress.com/ASP/). 

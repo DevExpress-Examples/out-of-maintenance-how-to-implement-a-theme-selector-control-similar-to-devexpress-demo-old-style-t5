@@ -23,7 +23,7 @@ Follow the steps below to allow users to switch between various themes:
     * [Styles](./CS/Styles)
     * [UserControl](./CS/UserControl)
 
-2. Register the **ThemeSelector** and **ThemeParametersSelector** controls in the *web.config* file:
+2. Register **ThemeSelector** and **ThemeParametersSelector** controls in the *web.config* file:
 
    ```aspx
    <pages>
@@ -44,7 +44,7 @@ Follow the steps below to allow users to switch between various themes:
    }
    ```
 
-4. In the master page, add the **ThemeSelector** and **ThemeParametersSelector** controls to [ASPxPanel](https://docs.devexpress.com/AspNet/14778/components/site-navigation-and-layout/panel) control:
+4. In the master page, add **ThemeSelector** and **ThemeParametersSelector** controls to [ASPxPanel](https://docs.devexpress.com/AspNet/14778/components/site-navigation-and-layout/panel) control:
 
    ```aspx
    <form id="form1" runat="server">

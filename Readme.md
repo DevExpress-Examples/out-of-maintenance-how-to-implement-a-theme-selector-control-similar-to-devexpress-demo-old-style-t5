@@ -3,70 +3,120 @@
 [![](https://img.shields.io/badge/Open_in_DevExpress_Support_Center-FF7200?style=flat-square&logo=DevExpress&logoColor=white)](https://supportcenter.devexpress.com/ticket/details/T504407)
 [![](https://img.shields.io/badge/📖_How_to_use_DevExpress_Examples-e9f6fc?style=flat-square)](https://docs.devexpress.com/GeneralInformation/403183)
 <!-- default badges end -->
-<!-- default file list -->
-*Files to look at*:
-
-* [ThemeGroupModel.cs](./CS/App_Code/ThemeGroupModel.cs) (VB: [ThemeGroupModel.vb](./VB/App_Code/ThemeGroupModel.vb))
-* [ThemeModel.cs](./CS/App_Code/ThemeModel.cs) (VB: [ThemeModel.vb](./VB/App_Code/ThemeModel.vb))
-* [ThemeModelBase.cs](./CS/App_Code/ThemeModelBase.cs) (VB: [ThemeModelBase.vb](./VB/App_Code/ThemeModelBase.vb))
-* [ThemesModel.cs](./CS/App_Code/ThemesModel.cs) (VB: [ThemesModel.vb](./VB/App_Code/ThemesModel.vb))
-* [Default.aspx](./CS/Default.aspx) (VB: [Default.aspx](./VB/Default.aspx))
-* [Default.aspx.cs](./CS/Default.aspx.cs) (VB: [Default.aspx.vb](./VB/Default.aspx.vb))
-* [Global.asax](./CS/Global.asax) (VB: [Global.asax](./VB/Global.asax))
-* [MasterPage.master.cs](./CS/MasterPage.master.cs) (VB: [MasterPage.master.vb](./VB/MasterPage.master.vb))
-* [ThemeSelector.ascx](./CS/UserControl/ThemeSelector.ascx) (VB: [ThemeSelector.ascx](./VB/UserControl/ThemeSelector.ascx))
-* [ThemeSelector.ascx.cs](./CS/UserControl/ThemeSelector.ascx.cs) (VB: [ThemeSelector.ascx.vb](./VB/UserControl/ThemeSelector.ascx.vb))
-<!-- default file list end -->
-# How to implement a Theme Selector control similar to DevExpress Demo (Old Style)
+# ASP.NET Web Forms Controls - How to implement a Theme Selector control shown in DevExpress Demos
 <!-- run online -->
-**[[Run Online]](https://codecentral.devexpress.com/t504407/)**
+**[[Run Online]](https://codecentral.devexpress.com/t590818/)**
 <!-- run online end -->
 
+This example demonstrates how to implement a Theme Selector control as in [ASP.NET Web Forms Demos](https://demos.devexpress.com/ASP/). 
 
-<p>The sample provides a web user control(ThemeSelector) that can be used in your project. To use this control in your solution, execute these steps:</p>
-<p>1. Copy following files, taking into account their location:</p>
-<p>   a. an xml file with theme groups and themes: Themes.xml.</p>
-<p>   b. classes that are responsible for getting and presenting data from Themes.xml: ThemeGroupModel.cs, ThemeModel.cs, ThemeModelBase.cs, ThemesModel.cs.</p>
-<p>   c. Sprite.png with images.</p>
-<p>   d. ThemeSelector.css with css classes.</p>
-<p>   e. ThemeSelector.ascx and ThemeSelector.ascx.cs.</p>
-<p>2. Register the ThemeSelector web user control in your web.config file:</p>
+![Theme Selector](image.png)
 
+## Overview
+
+Follow the steps below to allow users to switch between various themes:
+
+1. Copy files from the folders listed below to the corresponding folders in your application.
+
+    * [App_Code](./CS/App_Code)
+    * [App_Data](./CS/App_Data)
+    * [Scripts](./CS/Scripts)
+    * [Styles](./CS/Styles)
+    * [UserControl](./CS/UserControl)
+
+2. Register the **ThemeSelector** and **ThemeParametersSelector** controls in the *web.config* file:
 
 ```aspx
 <pages>
   <controls>
+    <!-- ... -->
+    <add src="~/UserControl/ThemeParametersSelector.ascx" tagName="ThemeParametersSelector" tagPrefix="dx" />
     <add src="~/UserControl/ThemeSelector.ascx" tagName="ThemeSelector" tagPrefix="dx" />
   </controls>
 </pages>
-
 ```
 
-
-<p>3. In the sample, a chosen theme is written to a cookie. To apply this theme from the cookie, subscribe to the Application.PreRequestHandlerExecute in your Global.asax file and handle it</p>
-<p>in the following manner:</p>
-
+3. Once the user selects a theme, the code example writes the theme to cookies. To apply this theme, handle the `Application.PreRequestHandlerExecute` event in the *Global.asax* file as follows:
 
 ```cs
 protected void Application_PreRequestHandlerExecute(object sender, EventArgs e) {
-    if(Request.Cookies["CurrentThemeCookieKey"] != null) {
-        DevExpress.Web.ASPxWebControl.GlobalTheme = Request.Cookies["CurrentThemeCookieKey"].Value;
-    }
+    DevExpress.Web.ASPxWebControl.GlobalTheme = Utils.CurrentTheme;
+    Utils.ResolveThemeParametes();
 }
-
 ```
 
-
-<p>4. The ThemeSelector control allows you to show a popup left or right relative to the "Themes" anchor. Use the ThemeSelector.PopupAlign property. The default value is PopupAlign.Right. </p>
-
+4. In the master page, add the **ThemeSelector** and **ThemeParametersSelector** controls to [ASPxPanel](https://docs.devexpress.com/AspNet/14778/components/site-navigation-and-layout/panel) control:
 
 ```aspx
-<dx:ThemeSelector runat="server" ID="ts2" PopupAlign="Left" />
+<form id="form1" runat="server">
+    <header>
+        <dx:ASPxPanel runat="server" ClientInstanceName="TopPanel" CssClass="header-panel" FixedPosition="WindowTop" EnableTheming="false">
+            <PanelCollection>
+                <dx:PanelContent>
+                    <a class="right-button icon cog right-button-toggle-themes-panel" href="javascript:void(0)" onclick="DXDemo.toggleThemeSettingsPanel(); return false;"></a>
+                </dx:PanelContent>
+            </PanelCollection>
+        </dx:ASPxPanel>
+    </header>
+    <div class="main-content-wrapper">
+        <section class="top-panel clearfix top-panel-dark">
+            <dx:ASPxButton runat="server" Text="Change Theme Settings" CssClass="theme-settings-menu-button adaptive"
+                EnableTheming="false" AutoPostBack="false" ImagePosition="Right" UseSubmitBehavior="false">
+                <Image SpriteProperties-CssClass="icon angle-down theme-settings-menu-button-image" />
+                <FocusRectBorder BorderWidth="0" />
+                <ClientSideEvents Click="DXDemo.toggleThemeSettingsPanel" />
+            </dx:ASPxButton>
+        </section>
+        <dx:ASPxPanel runat="server" ClientInstanceName="ThemeSettingsPanel" CssClass="theme-settings-panel"
+            FixedPosition="WindowRight" Collapsible="true" EnableTheming="false" ScrollBars="Auto">
+            <SettingsCollapsing AnimationType="Slide" ExpandEffect="PopupToLeft" ExpandButton-Visible="false" />
+            <Styles>
+                <ExpandBar Width="0" />
+                <ExpandedPanel CssClass="theme-settings-panel-expanded"></ExpandedPanel>
+            </Styles>
+            <PanelCollection>
+                <dx:PanelContent>
+                    <div class="top-panel top-panel-dark clearfix">
+                        <dx:ASPxButton runat="server" Text="Change Theme Settings" CssClass="theme-settings-menu-button"
+                            EnableTheming="false" AutoPostBack="false" ImagePosition="Right" HorizontalAlign="Left" UseSubmitBehavior="false">
+                            <Image SpriteProperties-CssClass="icon angle-down theme-settings-menu-button-image" />
+                            <FocusRectBorder BorderWidth="0" />
+                            <ClientSideEvents Click="DXDemo.toggleThemeSettingsPanel" />
+                        </dx:ASPxButton>
+                    </div>
+                    <div class="theme-settings-panel-content">
+                        <dx:ThemeSelector ID="ThemeSelector" runat="server" />
+                        <% if(Utils.CanApplyThemeParameters) { %>
+                        <dx:ThemeParametersSelector ID="ThemeParametersSelector" runat="server" />
+                        <% } %>
+                    </div>
+                </dx:PanelContent>
+            </PanelCollection>
+        </dx:ASPxPanel>
+    </div>
+    <div style="clear: both;">
+        <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+        </asp:ContentPlaceHolder>
+    </div>
+</form>
 ```
 
+## Files to Review
+* [ThemeGroupModel.cs](./CS/App_Code/ThemeGroupModel.cs) (VB: [ThemeGroupModel.vb](./VB/App_Code/ThemeGroupModel.vb))
+* [ThemeModel.cs](./CS/App_Code/ThemeModel.cs) (VB: [ThemeModel.vb](./VB/App_Code/ThemeModel.vb))
+* [ThemeModelBase.cs](./CS/App_Code/ThemeModelBase.cs) (VB: [ThemeModelBase.vb](./VB/App_Code/ThemeModelBase.vb))
+* [ThemesModel.cs](./CS/App_Code/ThemesModel.cs) (VB: [ThemesModel.vb](./VB/App_Code/ThemesModel.vb))
+* [Utils.cs](./CS/App_Code/Utils.cs) (VB: [Utils.vb](./VB/App_Code/Utils.vb))
+* [Default.aspx](./CS/Default.aspx) (VB: [Default.aspx](./VB/Default.aspx))
+* [Default.aspx.cs](./CS/Default.aspx.cs) (VB: [Default.aspx.vb](./VB/Default.aspx.vb))
+* [Global.asax](./CS/Global.asax) (VB: [Global.asax](./VB/Global.asax))
+* [MasterPage.master.cs](./CS/MasterPage.master.cs) (VB: [MasterPage.master.vb](./VB/MasterPage.master.vb))
+* [Script.js](./CS/Scripts/Script.js) (VB: [Script.js](./VB/Scripts/Script.js))
+* [ThemeParametersSelector.ascx](./CS/UserControl/ThemeParametersSelector.ascx) (VB: [ThemeParametersSelector.ascx](./VB/UserControl/ThemeParametersSelector.ascx))
+* [ThemeParametersSelector.ascx.cs](./CS/UserControl/ThemeParametersSelector.ascx.cs) (VB: [ThemeParametersSelector.ascx.vb](./VB/UserControl/ThemeParametersSelector.ascx.vb))
+* [ThemeSelector.ascx](./CS/UserControl/ThemeSelector.ascx) (VB: [ThemeSelector.ascx](./VB/UserControl/ThemeSelector.ascx))
+* [ThemeSelector.ascx.cs](./CS/UserControl/ThemeSelector.ascx.cs) (VB: [ThemeSelector.ascx.vb](./VB/UserControl/ThemeSelector.ascx.vb))
 
-<p><br><strong>Starting with v17.2</strong> we have changed our Theme Selector implementation. Now, this user control is placed to ASPxPanel and is mobile friendly. A new sample can be found in the following thread: <a href="https://www.devexpress.com/Support/Center/p/T590818">How to implement a Theme Selector control similar to DevExpress Demo</a></p>
+## More Examples
 
-<br/>
-
-
+* [How to implement a Theme Selector control shown in DevExpress Demo (Old Style)](https://github.com/DevExpress-Examples/how-to-implement-a-theme-selector-control-similar-to-devexpress-demo-old-style-t504407)
